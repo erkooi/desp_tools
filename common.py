@@ -844,6 +844,35 @@ def reinterleave(input_streams, nof_out, block_size_in=1, block_size_out=1):
          inter_out_arr.append(interleave(inter_in_arr[out_no], block_size_out))
     return inter_out_arr
 
+def reverse_cols_lr(matrix):
+    """ Flip order of the columns in the matrix[row][col]
+    
+    Using numpy only fits matrix lists with numbers:
+
+        np_matrix = np.array(matrix)
+        return np_matrix.fliplr().tolist()
+    
+    To suit any list element type use general fliplr.
+    """
+    result = []
+    for row in matrix:
+        result.append(list(reversed(row)))
+    return result
+        
+def reverse_rows_ud(matrix):
+    """ Flip order of the rows in the matrix[row][col]
+    
+    Using numpy only fits matrix lists with numbers:
+
+        np_matrix = np.array(matrix)
+        return np_matrix.flipud().tolist()
+    
+    To suit any list element type use general flipud.
+    
+    This reverse_rows_ud() is equivalent to reverse_list(), because it affects the row index, that is the first index.
+    """
+    return list(reversed(matrix))
+    
 def transpose(matrix):
     """ PD transpose using numpy """
     np_matrix = np.array(matrix)
