@@ -243,7 +243,8 @@ class Testlog:
             self.append_log(vLevel, '')   # end with newline
         
 
-    def append_log_two_dimensional_list(self, vLevel, name, A, prefixStr='', transpose=False, dataWidth=4, dataLeft=False, fractionWidth=0, fractionExponent=False, colIndices=None, rowIndices=None):
+    def append_log_two_dimensional_list(self, vLevel, name, A, prefixStr='', transpose=False, reverseCols=False, reverseRows=False,
+                                        dataWidth=4, dataLeft=False, fractionWidth=0, fractionExponent=False, colIndices=None, rowIndices=None):
         """
         Log two dimensional list A[row][col] per row with index labels
         
@@ -251,6 +252,9 @@ class Testlog:
         . name             = name, title of the list
         . A                = the two dimensional list
         . prefixStr        = prefix string that is printed before every line, can e.g. be used for grep
+        . transpose        = when true transpose(A) to log rows as columns and columns as rows
+        . reverseCols      = when true reverse the order of the columns
+        . reverseRows      = when true reverse the order of the rows
         . dataWidth        = of data in column, see self.data_to_string
         . dataLeft         = of data in column, see self.data_to_string
         . fractionWidth    = of data in column, see self.data_to_string
@@ -269,6 +273,10 @@ class Testlog:
             if transpose:
                 #print name, transpose
                 A = cm.transpose(A)
+            if reverseRows:
+                A = cm.reverse_rows_ud(A)
+            if reverseCols:
+                A = cm.reverse_cols_lr(A)
             nof_rows = len(A)
             nof_cols = len(A[0])
             self.append_log(vLevel, prefixStr + 'col :')
@@ -279,7 +287,7 @@ class Testlog:
                 rowIndices = list(range(nof_rows))
                 rowIndexLength = 6                          # default row_str prefix length
             else:
-                rowIndexLength = 3 + len(rowIndices[-1])    # use last row index string for row_str prefix length
+                rowIndexLength = 3 + len(str(rowIndices[-1]))  # use last row index string for row_str prefix length
             col_index_str = ' ' * rowIndexLength
             for col in colIndices:
                 col_index_str += '%*d ' % (dataWidth, col)
