@@ -1,7 +1,7 @@
 Citation Notice version 1.0
 
 ```
-This Citation Notice is part of the apertif_matlab software suite.
+This Citation Notice is part of the desp_tools software suite.
 
 Parties that use ASTRON Software resulting in papers and/or publications are requested to
 refer to the DOI(s) that correspond(s) to the version(s) of the ASTRON Software used:
