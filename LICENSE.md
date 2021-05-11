@@ -1,6 +1,6 @@
-# apertif_matlab license
+# desp_tools license
 
-The apertif_matlab package is open source and  available under the Apache Licence 2.0. The following text fragment shall be placed in comments at the top of each (new) source code file:
+The desp_tools package is open source and  available under the Apache Licence 2.0. The following text fragment shall be placed in comments at the top of each (new) source code file:
 
 ```
   Copyright [year] [name of copyright owner]

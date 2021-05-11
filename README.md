@@ -13,7 +13,7 @@ If you use (part of) the **desp_tools** package please attribute the use as indi
 
 ### [NOTICE](NOTICE.md)
 
-The apertif_matlab package is Open Source and available under the following LICENSE:
+The **desp_tools** package is Open Source and available under the following LICENSE:
 
 ### [LICENSE](LICENSE.md)
 
