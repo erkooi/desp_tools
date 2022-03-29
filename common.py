@@ -162,38 +162,78 @@ def int_wrap(inp, w):
             outp=(inp & wrap_mask) - wrap_sign
     return outp
 
-def int_round(inp, w, direction="HALF_AWAY"):
-    # Purpose : Round the w LSbits of an integer value
+def int_round(inp, r, direction="HALF_AWAY", clip=False, outp_w=0):
+    # Purpose : Round the r LSbits of an integer value
     # Input:
-    # - inp       = Integer value
-    # - w         = Number of LSbits to round
-    # - direction = "HALF_AWAY", "HALF_UP"
+    # - inp       = Integer value, signed value
+    # - r         = Number of LSbits to round
+    # - direction = "HALF_AWAY", "HALF_UP", "HALF_EVEN"
+    # - clip, outp_w = When clip is True then clip output to fit in outp_w bits if output
+    #                  otherwise would wrap due to rounding
     # Description:
     #   direction = "HALF_AWAY" --> Round half away from zero so +0.5 --> 1, -0.5 --> -1.
     #   direction = "HALF_UP"   --> Round half to +infinity   so +0.5 --> 1, -0.5 --> 0.
+    #   direction = "HALF_EVEN" --> Round half to even        so +0.5 --> 0, -0.5 --> 0,
+    #                                                            +1.5 --> 2, -1.5 --> -2.
+    #   half down       : y = ceil(x - 0.5)
+    #   half up         : y = floor(x + 0.5)
+    #   integer division: x // y = floor(x / y)
     # Return:
     # - outp     = Rounded integer value
     outp=inp
-    if w>0:
-        round_factor=2**w
-        round_p=2**(w-1)
-        round_n=2**(w-1)-1
+    if r>0:
+        round_factor=2**r
+        round_p = 2**(r-1)   # = 0.5, = half
+        round_n = 2**(r-1)-1
         if direction == "HALF_UP":
-            outp=(inp+round_p)//round_factor
-        if direction == "HALF_AWAY":
+            outp = (inp + round_p) // round_factor
+        elif direction == "HALF_AWAY":
             if inp >= 0:
-                outp=(inp+round_p)//round_factor
+                outp = (inp + round_p) // round_factor   # Round half up for positive
             else:
-                outp=(inp+round_n)//round_factor
+                outp = (inp + round_n) // round_factor   # Round half down for negative
+        elif direction == "HALF_EVEN":
+            outp = (inp + round_p) // round_factor  # Round to nearest using floor(x/y + 0.5)
+            if inp % round_factor == round_p:
+                if outp % 2 == 1:  # Round half to even, so when odd subtract 1
+                    outp -= 1      # to make outp even
+        else:
+            print('int_round: Error: unsupported round direction')
+        if clip:
+            clip_max = 2**(outp_w-1)-1  # signed max
+            if outp > clip_max:
+                outp = clip_max
     return outp
 
-def int_truncate(inp, w, direction=''):
-    # Purpose : Truncate the w LSbits of an integer value
+
+def uint_round(inp, r, direction="HALF_UP", clip=False, outp_w=0):
+    # Purpose : Round the r LSbits of an natural value
+    # Input:
+    # - inp       = Natural value, unsigned value
+    # - r         = Number of LSbits to round
+    # - direction = "HALF_UP", "HALF_EVEN"
+    # - clip, outp_w = When clip is True then clip output to fit in outp_w bits if output
+    #                  otherwise would wrap due to rounding
+    # Description:
+    #   Note for unsigned "HALF_AWAY" is same as "HALF_UP"
+    #   direction = "HALF_UP"   --> Round half to +infinity   so +0.5 --> 1
+    #   direction = "HALF_EVEN" --> Round half to even        so +0.5 --> 0
+    #                                                            +1.5 --> 2
+    # Return:
+    # - outp     = Rounded natural value
+    if inp >= 0:
+        return int_round(inp, r, direction, clip, outp_w+1)
+    else:
+        print('uint_round: Error: unsigned inp must be >= 0')
+
+
+def int_truncate(inp, r, direction=''):
+    # Purpose : Truncate the r LSbits of an integer value
     # Input:
     # - inp      = Integer value
-    # - w        = Number of LSbits to truncate
+    # - r        = Number of LSbits to truncate
     # Description: Remove LSBits.
-    #   Default truncate behaves asymmetric like in HDL by removing the w lsbits using shift right >> w
+    #   Default truncate behaves asymmetric like in HDL by removing the r lsbits using shift right >> r
     #   If direction is SYMMETRIC then inp < 0 is -truncate(-inp)
     # Return:
     # - outp     = Truncated value
@@ -203,14 +243,14 @@ def int_truncate(inp, w, direction=''):
     #  [cm.int_truncate(d,2) for d in range(-8,8)]
     #  [cm.int_truncate(d,2,'') for d in range(-8,8)]
     outp=inp
-    if w>0:
+    if r>0:
         if direction == "SYMMETRIC":
             if inp >= 0:
-                outp=inp>>w
+                outp=inp>>r
             else:
-                outp=-((-inp)>>w)
+                outp=-((-inp)>>r)
         else:
-            outp=inp>>w
+            outp=inp>>r
     return outp
         
 
@@ -872,7 +912,7 @@ def reverse_rows_ud(matrix):
     This reverse_rows_ud() is equivalent to reverse_list(), because it affects the row index, that is the first index.
     """
     return list(reversed(matrix))
-    
+
 def transpose(matrix):
     """ PD transpose using numpy """
     np_matrix = np.array(matrix)
